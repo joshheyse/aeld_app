@@ -1,6 +1,7 @@
 
 #pragma once
 #include <functional>
+#include <optional>
 #include <string>
 #include <thread>
 
@@ -18,13 +19,14 @@
 
 namespace bbc {
 
-template <typename T> class CanValue {
-
-  canid_t id_;
-  std::function<T(const struct can_frame &)> decoder_;
-
-  CanValue(canid_t id, std::function<T(const struct can_frame &)> decoer)
-      : id_(id), decoder_(decoer) {}
+struct Values {
+  std::optional<double> speed{};
+  std::optional<double> rpm{};
+  std::optional<double> temp{};
+  std::optional<double> throttle{};
+  std::optional<bool> brake{};
+  std::optional<bool> cel{};
+  std::optional<bool> eml{};
 };
 
 class CanReader {
@@ -33,11 +35,14 @@ private:
   int socket_;
   std::string interface_;
   std::thread consumer_;
+  Values values_;
 
   void consume();
 
 public:
   CanReader(std::string interface);
   ~CanReader();
+
+  Values getValues() const;
 };
 } // namespace bbc

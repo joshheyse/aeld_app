@@ -149,17 +149,11 @@ public:
 // --------------------------------------------------------------------------
 
 const std::string DFLT_SERVER_URI{"mqtt://localhost:1883"};
-const std::string TOPIC{"test/topic"};
-
-const std::string PAYLOAD1{"Hello World!"};
-
-const char *PAYLOAD2 = "Hi there!";
-const char *PAYLOAD3 = "Is anyone listening?";
-
-const int QOS = 1;
+const std::string DFLT_CAN_DEV{"vcan0"};
 
 int main(int argc, char *argv[]) {
-  auto serverURI = (argc > 1) ? std::string{argv[1]} : DFLT_SERVER_URI;
+  auto canDev = (argc > 1) ? std::string{argv[1]} : DFLT_CAN_DEV;
+  auto serverURI = (argc > 2) ? std::string{argv[2]} : DFLT_SERVER_URI;
 
   std::cout << "Initializing..." << std::endl;
   sample_mem_persistence persist;
@@ -180,9 +174,46 @@ int main(int argc, char *argv[]) {
 
     // First use a message pointer.
 
-    const bbc::CanReader canReader("vcan0");
+    const bbc::CanReader canReader(canDev);
     while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      const auto values = canReader.getValues();
+
+      if (values.speed.has_value()) {
+        mqtt::message_ptr pubmsg =
+            mqtt::make_message("speed", std::to_string(values.speed.value()));
+        client.publish(pubmsg);
+      }
+      if (values.rpm.has_value()) {
+        mqtt::message_ptr pubmsg =
+            mqtt::make_message("rpm", std::to_string(values.rpm.value()));
+        client.publish(pubmsg);
+      }
+      if (values.temp.has_value()) {
+        mqtt::message_ptr pubmsg =
+            mqtt::make_message("temp", std::to_string(values.temp.value()));
+        client.publish(pubmsg);
+      }
+      if (values.throttle.has_value()) {
+        mqtt::message_ptr pubmsg = mqtt::make_message(
+            "throttle", std::to_string(values.throttle.value()));
+        client.publish(pubmsg);
+      }
+      if (values.brake.has_value()) {
+        mqtt::message_ptr pubmsg =
+            mqtt::make_message("brake", std::to_string(values.brake.value()));
+        client.publish(pubmsg);
+      }
+      if (values.cel.has_value()) {
+        mqtt::message_ptr pubmsg =
+            mqtt::make_message("cel", std::to_string(values.cel.value()));
+        client.publish(pubmsg);
+      }
+      if (values.eml.has_value()) {
+        mqtt::message_ptr pubmsg =
+            mqtt::make_message("eml", std::to_string(values.eml.value()));
+        client.publish(pubmsg);
+      }
     }
 
     // Disconnect
