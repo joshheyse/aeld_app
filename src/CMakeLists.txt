@@ -1,7 +1,9 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.25)
 
 file(GLOB SOURCE_FILES "*.cpp")
 
-add_executable(app ${SOURCE_FILES} )
-target_link_libraries(app pahottpp)
-target_link_libraries(app pahomqtt3a)
+add_executable(bbc ${SOURCE_FILES} )
+target_link_libraries(bbc pahottpp)
+target_link_libraries(bbc pahomqtt3a)
+
+install(TARGETS bbc RUNTIME DESTINATION bin)
